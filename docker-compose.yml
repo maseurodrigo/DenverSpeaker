@@ -1,0 +1,24 @@
+version: '3.9'
+services:
+    lavalink:
+        container_name: lavalink
+        image: lavalink:latest
+        volumes:
+            - /Lavalink/application.yml
+        restart: always
+        network_mode: bridge
+        ports:
+            - '2333:2333'
+        build:
+            context: ./
+            dockerfile: ./Lavalink/Dockerfile
+    denver:
+        container_name: denver
+        image: denverspeaker:latest
+        restart: always
+        network_mode: bridge
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        depends_on:
+            - lavalink
