@@ -4,7 +4,7 @@ services:
         container_name: lavalink
         image: lavalink:latest
         volumes:
-            - /Lavalink/application.yml
+            - /Lavalink/application.yml:/Lavalink/application.yml
         restart: always
         network_mode: bridge
         ports:
