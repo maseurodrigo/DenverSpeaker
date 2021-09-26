@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -19,15 +18,15 @@ namespace DenverSpeaker.Modules
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task getHelp() {
             // List of all available commands
-            List<CommandInfo> allCommands = commandService.Commands.ToList();
+            List<CommandInfo> allCommands = commandService.Commands.OrderBy(comm => comm.Name).ToList();
             EmbedBuilder embedBuilder = new EmbedBuilder();
             // List of commands to exclude from help list
-            Dictionary<String, bool> commsToExclude = new Dictionary<String, bool>() { { "help", false }, { "lavanode", false } };
+            Dictionary<String, bool> commsToExclude = new Dictionary<String, bool>() { { "conn", false }, { "help", false }, { "lavanode", false } };
             foreach (CommandInfo command in allCommands) {
                 if (!commsToExclude.ContainsKey(command.Name)) {
                     // Get the command Summary attribute information
-                    String embedFieldText = command.Summary ?? "No description available\n";
-                    embedBuilder.AddField(CultureInfo.CurrentCulture.TextInfo.ToTitleCase(command.Name.ToLower()), embedFieldText);
+                    String embedFieldText = command.Summary ?? "No description available";
+                    embedBuilder.AddField($"`{ command.Name.ToLower() }`", embedFieldText);
                 }
             }
             // Reply with the embed

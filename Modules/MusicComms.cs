@@ -74,7 +74,7 @@ namespace DenverSpeaker.Modules
             // Parse URL params.
             NameValueCollection qString = HttpUtility.ParseQueryString(_url);
             // Checking if query string its an URL
-            if (!_url.StartsWith("https") && !_url.StartsWith("http")) {
+            if (!Uri.IsWellFormedUriString(_url, UriKind.Absolute)) {
                 EmbedBuilder noURLs = new EmbedBuilder();
                 noURLs.Color = embedsColor;
                 noURLs.Description = "For this command its needed a valid URL\nYou can use `yt` or `sc` for searching";
@@ -163,7 +163,7 @@ namespace DenverSpeaker.Modules
             // Remove white spaces from query
             _ytQuery = _ytQuery.Trim();
             // Checking if query string its an URL
-            if (_ytQuery.StartsWith("https") || _ytQuery.StartsWith("http")) {
+            if (Uri.IsWellFormedUriString(_ytQuery, UriKind.Absolute)) {
                 EmbedBuilder noURLs = new EmbedBuilder();
                 noURLs.Color = embedsColor;
                 noURLs.Description = "Use the `play` command to use links";
@@ -231,7 +231,7 @@ namespace DenverSpeaker.Modules
             // Remove white spaces from query
             _ytQuery = _ytQuery.Trim();
             // Checking if query string its an URL
-            if (_ytQuery.StartsWith("https") || _ytQuery.StartsWith("http")) {
+            if (Uri.IsWellFormedUriString(_ytQuery, UriKind.Absolute)) {
                 EmbedBuilder noURLs = new EmbedBuilder();
                 noURLs.Color = embedsColor;
                 noURLs.Description = "Use the `play` command to use links";
