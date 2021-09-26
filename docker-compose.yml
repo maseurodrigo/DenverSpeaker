@@ -8,8 +8,6 @@ services:
         build:
             context: ./
             dockerfile: ./Lavalink/Dockerfile
-        volumes:
-            - /Lavalink/application.yml:/opt/Lavalink/application.yml
         restart: always
     denver:
         container_name: denver

@@ -111,7 +111,7 @@ namespace DenverSpeaker.Modules
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
                 EmbedBuilder noMatches = new EmbedBuilder();
                 noMatches.Color = embedsColor;
-                noMatches.Description = $"I didn't find anything about `{ _url }` on YouTube but I can look it up in Narnia";
+                noMatches.Description = $"I didn't find anything for `{ _url }`";
                 await ReplyAsync(null, false, noMatches.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
@@ -194,7 +194,7 @@ namespace DenverSpeaker.Modules
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
                 EmbedBuilder noMatches = new EmbedBuilder();
                 noMatches.Color = embedsColor;
-                noMatches.Description = $"I didn't find anything about `{ _ytQuery }` on YouTube but I can look it up in Narnia";
+                noMatches.Description = $"I didn't find anything about `{ _ytQuery }` on YouTube, but I can look it up in Narnia";
                 await ReplyAsync(null, false, noMatches.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
@@ -262,7 +262,7 @@ namespace DenverSpeaker.Modules
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
                 EmbedBuilder noMatches = new EmbedBuilder();
                 noMatches.Color = embedsColor;
-                noMatches.Description = $"I didn't find anything about `{ _ytQuery }` on SoundCloud but I can look it up in Narnia";
+                noMatches.Description = $"I didn't find anything about `{ _ytQuery }` on SoundCloud, but I can look it up in Narnia";
                 await ReplyAsync(null, false, noMatches.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
