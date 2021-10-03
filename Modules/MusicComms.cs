@@ -146,32 +146,19 @@ namespace DenverSpeaker.Modules
                     inQueue.Color = embedsColor;
                     inQueue.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
                     await ReplyAsync(null, false, inQueue.Build());
-                    // Get first enqueued track
-                    LavaTrack firstTrack = searchResp.Tracks.ElementAt(0);
-                    await currentPlayer.PlayAsync(firstTrack);
-                    // Next track embed details
-                    EmbedBuilder embedTrack = new EmbedBuilder();
-                    embedTrack.Color = embedsColor;
-                    embedTrack.Title = "Playing now...";
-                    embedTrack.AddField("Name", firstTrack.Title, false);
-                    embedTrack.AddField("Author", firstTrack.Author, true);
-                    embedTrack.AddField("Duration", firstTrack.Duration, true);
-                    embedTrack.ThumbnailUrl = await firstTrack.FetchArtworkAsync();
-                    await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
-                } else {
-                    // When LavaPlayer its idle trigger a PlayAsync
-                    LavaTrack track = searchResp.Tracks.ElementAt(0);
-                    await currentPlayer.PlayAsync(track);
-                    // Next track embed details
-                    EmbedBuilder embedTrack = new EmbedBuilder();
-                    embedTrack.Color = embedsColor;
-                    embedTrack.Title = "Playing now...";
-                    embedTrack.AddField("Name", track.Title, false);
-                    embedTrack.AddField("Author", track.Author, true);
-                    embedTrack.AddField("Duration", track.Duration, true);
-                    embedTrack.ThumbnailUrl = await track.FetchArtworkAsync();
-                    await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
                 }
+                // Get first enqueued track
+                LavaTrack startTrack = searchResp.Tracks.ElementAt(0);
+                await currentPlayer.PlayAsync(startTrack);
+                // Next track embed details
+                EmbedBuilder embedTrack = new EmbedBuilder();
+                embedTrack.Color = embedsColor;
+                embedTrack.Title = "Playing now...";
+                embedTrack.AddField("Name", startTrack.Title, false);
+                embedTrack.AddField("Author", startTrack.Author, true);
+                embedTrack.AddField("Duration", startTrack.Duration, true);
+                embedTrack.ThumbnailUrl = await startTrack.FetchArtworkAsync();
+                await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
             }
         }
 
