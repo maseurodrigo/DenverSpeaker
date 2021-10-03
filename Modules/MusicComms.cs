@@ -22,7 +22,7 @@ namespace DenverSpeaker.Modules
         private readonly LavaNode lavaNode;
         private static readonly IEnumerable<int> enumRange = Enumerable.Range(1900, 2000);
         private static readonly Color embedsColor = new Color(239, 83, 80);
-        private MusicComms(LavaNode _lavaNode) => this.lavaNode = _lavaNode;
+        private MusicComms(LavaNode _lavaNode) => lavaNode = _lavaNode;
 
         [Command("lavanode")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -66,6 +66,7 @@ namespace DenverSpeaker.Modules
         }
 
         [Command("play")]
+        [Alias("p")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
         [Summary("Start playing a music or playlist from the given url")]
         public async Task playURLAsync([Remainder][Summary("URL")] String _url) {
@@ -81,11 +82,13 @@ namespace DenverSpeaker.Modules
                 await ReplyAsync(null, false, noURLs.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             } else if (!String.IsNullOrWhiteSpace(qString.Get("list"))) {
-                EmbedBuilder noPlaylists = new EmbedBuilder();
-                noPlaylists.Color = embedsColor;
-                noPlaylists.Description = "I'm not accepting playlists at the moment";
-                await ReplyAsync(null, false, noPlaylists.Build(), null, null, new MessageReference(Context.Message.Id));
-                return;
+                if(qString.Count > 1) {
+                    EmbedBuilder noValidPlaylist = new EmbedBuilder();
+                    noValidPlaylist.Color = embedsColor;
+                    noValidPlaylist.Description = "This link doesnt correspond to a valid playlist";
+                    await ReplyAsync(null, false, noValidPlaylist.Build(), null, null, new MessageReference(Context.Message.Id));
+                    return;
+                }
             }
             IVoiceState voiceState = Context.User as IVoiceState;
             // Lava client it's not present on any voice channel
@@ -104,7 +107,7 @@ namespace DenverSpeaker.Modules
             // Assign LavaPlayer to the current discord server
             LavaPlayer currentPlayer = lavaNode.GetPlayer(Context.Guild);
             // User in a different vchannel than bot
-            if (voiceState?.VoiceChannel is null || !voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
+            if (!voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
             // Direct searches with a given url
             SearchResponse searchResp = await lavaNode.SearchAsync(SearchType.Direct, _url);
             // Couldnt find anything for the query param given
@@ -119,11 +122,11 @@ namespace DenverSpeaker.Modules
             if (currentPlayer.PlayerState is PlayerState.Playing || currentPlayer.PlayerState is PlayerState.Paused) {
                 // If its a playlist
                 if (!String.IsNullOrWhiteSpace(searchResp.Playlist.Name)) {
-                    foreach (var track in searchResp.Tracks) currentPlayer.Queue.Enqueue(track);
+                    foreach (var track in searchResp.Tracks) { currentPlayer.Queue.Enqueue(track); }
                     // Enqueued track embed
                     EmbedBuilder inQueue = new EmbedBuilder();
                     inQueue.Color = embedsColor;
-                    inQueue.Description = $"Currently { searchResp.Tracks.Count } tracks in queue";
+                    inQueue.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
                     await ReplyAsync(null, false, inQueue.Build());
                 } else {
                     LavaTrack track = searchResp.Tracks.ElementAt(0);
@@ -137,7 +140,24 @@ namespace DenverSpeaker.Modules
             } else {
                 // If its a playlist
                 if (!String.IsNullOrWhiteSpace(searchResp.Playlist.Name)) {
-                    foreach (var track in searchResp.Tracks) currentPlayer.Queue.Enqueue(track);
+                    foreach (LavaTrack track in searchResp.Tracks.Skip(1)) { currentPlayer.Queue.Enqueue(track); }
+                    // Enqueued track embed
+                    EmbedBuilder inQueue = new EmbedBuilder();
+                    inQueue.Color = embedsColor;
+                    inQueue.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
+                    await ReplyAsync(null, false, inQueue.Build());
+                    // Get first enqueued track
+                    LavaTrack firstTrack = searchResp.Tracks.ElementAt(0);
+                    await currentPlayer.PlayAsync(firstTrack);
+                    // Next track embed details
+                    EmbedBuilder embedTrack = new EmbedBuilder();
+                    embedTrack.Color = embedsColor;
+                    embedTrack.Title = "Playing now...";
+                    embedTrack.AddField("Name", firstTrack.Title, false);
+                    embedTrack.AddField("Author", firstTrack.Author, true);
+                    embedTrack.AddField("Duration", firstTrack.Duration, true);
+                    embedTrack.ThumbnailUrl = await firstTrack.FetchArtworkAsync();
+                    await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
                 } else {
                     // When LavaPlayer its idle trigger a PlayAsync
                     LavaTrack track = searchResp.Tracks.ElementAt(0);
@@ -187,7 +207,7 @@ namespace DenverSpeaker.Modules
             // Assign LavaPlayer to the current discord server
             LavaPlayer currentPlayer = lavaNode.GetPlayer(Context.Guild);
             // User in a different vchannel than bot
-            if (voiceState?.VoiceChannel is null || !voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
+            if (!voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
             // YouTube searches with a given param.
             SearchResponse searchResp = await lavaNode.SearchYouTubeAsync(_ytQuery);
             // Couldnt find anything for the query param given
@@ -255,7 +275,7 @@ namespace DenverSpeaker.Modules
             // Assign LavaPlayer to the current discord server
             LavaPlayer currentPlayer = lavaNode.GetPlayer(Context.Guild);
             // User in a different vchannel than bot
-            if (voiceState?.VoiceChannel is null || !voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
+            if (!voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
             // SoundCloud searches with a given param.
             SearchResponse searchResp = await lavaNode.SearchSoundCloudAsync(_ytQuery);
             // Couldnt find anything for the query param given
@@ -295,7 +315,7 @@ namespace DenverSpeaker.Modules
         [Command("skip")]
         [Alias("next")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
-        [Summary("Skip to next track in queue")]
+        [Summary("Skip to the next track in queue")]
         public async Task skipNextTrack() {
             // User nor bot it's not present on any voice channel
             IVoiceState voiceState = Context.User as IVoiceState;

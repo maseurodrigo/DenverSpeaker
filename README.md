@@ -3,7 +3,7 @@
 | Command | Alias | Description |
 | --- | --- | --- |
 | **connection** | **conn** | Get current status of bot connection |
-| **play** | | Start playing a music or playlist from the given url |
+| **play** | **p** | Start playing a music or playlist from the given url |
 | **youtube** | **yt** | Start playing a music from YouTube |
 | **soundcloud** | **sc** | Start playing a music from SoundCloud |
 | **skip** | **next** | Skip to next track in queue |

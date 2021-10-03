@@ -12,7 +12,7 @@ namespace DenverSpeaker.Modules
     {
         // Getting all services through constructor param with AddSingleton()
         private readonly CommandService commandService;
-        private GeneralComms(CommandService _commandService) => this.commandService = _commandService;
+        private GeneralComms(CommandService _commandService) => commandService = _commandService;
 
         [Command("help")]
         [RequireBotPermission(ChannelPermission.SendMessages)]

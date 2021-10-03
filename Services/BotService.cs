@@ -17,9 +17,9 @@ namespace DenverSpeaker.Services
 
         public BotService(DiscordSocketClient _discordClient, CommandService _discordCommands, IServiceProvider _discordService, BotData _botData) {
             discordService = _discordService;
-            this.discordClient = _discordClient;
-            this.discordCommands = _discordCommands;
-            this.botData = _botData;
+            discordClient = _discordClient;
+            discordCommands = _discordCommands;
+            botData = _botData;
         }
 
         // Create connection between bot and discord server

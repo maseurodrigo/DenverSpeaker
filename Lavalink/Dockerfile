@@ -11,4 +11,7 @@ USER lavalink
 COPY ./Lavalink/Lavalink.jar Lavalink.jar
 COPY ./Lavalink/application.yml application.yml
 
+# Internal port expose
+EXPOSE 2333
+
 ENTRYPOINT ["java", "-Djdk.tls.client.protocols=TLSv1.1,TLSv1.2", "-jar", "Lavalink.jar"]
