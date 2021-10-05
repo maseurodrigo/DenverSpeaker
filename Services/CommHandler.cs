@@ -30,7 +30,8 @@ namespace DenverSpeaker.Services
             lavaNode = _lavaNode;
             botData = _botData;
             // DiscordSocketClient functions
-            discordClient.Ready += client_Ready;
+            // When discordClient its ready connect Victoria client
+            discordClient.Ready += async() => { if (!lavaNode.IsConnected) { await lavaNode.ConnectAsync(); } };
             discordClient.MessageReceived += client_NewCommandReceived;
             discordClient.UserVoiceStateUpdated += client_UserVoiceStateUpdated;
             discordClient.Log += botLogEvents;
@@ -38,11 +39,6 @@ namespace DenverSpeaker.Services
             lavaNode.OnTrackEnded += lavaClient_OnTrackEnded;
             lavaNode.OnTrackStuck += lavaClient_OnTrackStuck;
             lavaNode.OnTrackException += lavaClient_OnTrackException;
-        }
-
-        private async Task client_Ready() {
-            // When discordClient its ready connect victoria client
-            if (!lavaNode.IsConnected) { await lavaNode.ConnectAsync(); }
         }
 
         private async Task client_NewCommandReceived(SocketMessage message) {
