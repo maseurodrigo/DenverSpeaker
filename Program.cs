@@ -39,7 +39,6 @@ namespace DenverSpeaker
                         client.Port = 2333;
                         client.Hostname = "lavalink";
                         client.Authorization = "youshallnotpass";
-                        client.EnableResume = true;
                         client.SelfDeaf = true;
                     }).AddSingleton(botData)
                     .AddSingleton<CommHandler>();

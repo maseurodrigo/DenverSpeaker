@@ -341,6 +341,7 @@ namespace DenverSpeaker.Modules
             if (currentPlayer.PlayerState.Equals(PlayerState.Paused) || 
                 currentPlayer.PlayerState.Equals(PlayerState.Stopped)) { return; }
             await currentPlayer.PauseAsync();
+            await Context.Message.AddReactionAsync(new Emoji("⏸️")); // Pause emoji reaction
         }
 
         [Command("resume")]
@@ -355,6 +356,7 @@ namespace DenverSpeaker.Modules
             // Player its already paused/stopped
             if (currentPlayer.PlayerState.Equals(PlayerState.Playing)) { return; }
             await currentPlayer.ResumeAsync();
+            await Context.Message.AddReactionAsync(new Emoji("⏯️")); // Resume emoji reaction
         }
 
         [Command("stop")]
@@ -370,6 +372,7 @@ namespace DenverSpeaker.Modules
             if (currentPlayer.PlayerState.Equals(PlayerState.Stopped)) { return; }
             await currentPlayer.StopAsync();
             currentPlayer.Queue.Clear();
+            await Context.Message.AddReactionAsync(new Emoji("⏹️")); // Stop emoji reaction
         }
 
         [Command("queue")]
