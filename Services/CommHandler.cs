@@ -71,9 +71,7 @@ namespace DenverSpeaker.Services
         }
 
         private async Task botLogEvents(LogMessage arg) {
-            await Task.Factory.StartNew(() => {
-                Console.WriteLine(arg.ToString());
-            });
+            await Task.Factory.StartNew(() => { Console.WriteLine(arg.ToString()); });
         }
 
         private async Task lavaClient_OnTrackEnded(TrackEndedEventArgs arg) {
@@ -104,9 +102,8 @@ namespace DenverSpeaker.Services
             try {
                 // Skip current track when its stucked
                 await arg.Player.SkipAsync();
-            } catch (Exception excep) {
-                Console.WriteLine(excep.Message);
-            } finally {
+            } catch (Exception excep) { Console.WriteLine(excep.Message); } 
+            finally {
                 // Re-added track to queue after throwing an exception
                 arg.Player.Queue.Enqueue(arg.Track);
             }
@@ -116,9 +113,8 @@ namespace DenverSpeaker.Services
             try {
                 // Skip current track when its stucked
                 await arg.Player.SkipAsync();
-            } catch (Exception excep) {
-                Console.WriteLine(excep.Message);
-            } finally {
+            } catch (Exception excep) { Console.WriteLine(excep.Message); } 
+            finally {
                 // Re-added track to queue after throwing an exception
                 arg.Player.Queue.Enqueue(arg.Track);
             }
