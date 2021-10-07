@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Collections.Concurrent;
 using DenverSpeaker.Data;
 using Discord;
 using Discord.Addons.Interactive;
@@ -20,6 +22,7 @@ namespace DenverSpeaker.Services
         public static IServiceProvider discordService { get; set; }
         public static LavaNode lavaNode { get; set; }
         public static BotData botData { get; set; }
+        private readonly ConcurrentDictionary<ulong, CancellationTokenSource> disconnTokens;
 
         public CommHandler(DiscordSocketClient _discordClient, CommandService _discordCommands, InteractiveService _discordInteractive,
             IServiceProvider _discordService, LavaNode _lavaNode, BotData _botData) {
@@ -29,6 +32,7 @@ namespace DenverSpeaker.Services
             discordService = _discordService;
             lavaNode = _lavaNode;
             botData = _botData;
+            disconnTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
             // DiscordSocketClient functions
             // When discordClient its ready connect Victoria client
             discordClient.Ready += async() => { if (!lavaNode.IsConnected) { await lavaNode.ConnectAsync(); } };
@@ -36,6 +40,7 @@ namespace DenverSpeaker.Services
             discordClient.UserVoiceStateUpdated += client_UserVoiceStateUpdated;
             discordClient.Log += botLogEvents;
             // LavaNode functions
+            lavaNode.OnTrackStarted += lavaClient_OnTrackStarted;
             lavaNode.OnTrackEnded += lavaClient_OnTrackEnded;
             lavaNode.OnTrackStuck += lavaClient_OnTrackStuck;
             lavaNode.OnTrackException += lavaClient_OnTrackException;
@@ -70,8 +75,18 @@ namespace DenverSpeaker.Services
             }
         }
 
-        private async Task botLogEvents(LogMessage arg) {
+        private async Task botLogEvents(LogMessage arg) { 
             await Task.Factory.StartNew(() => { Console.WriteLine(arg.ToString()); });
+        }
+
+        private async Task lavaClient_OnTrackStarted(TrackStartEventArgs arg) {
+            await Task.Factory.StartNew(() => {
+                // Cancel disconnect tasks if a new track is added/started
+                if (!disconnTokens.TryGetValue(arg.Player.VoiceChannel.Id, out var value)) { return; }
+                if (value.IsCancellationRequested) { return; }
+                // Auto disconnect cancellation
+                value.Cancel(true);
+            });
         }
 
         private async Task lavaClient_OnTrackEnded(TrackEndedEventArgs arg) {
@@ -79,7 +94,11 @@ namespace DenverSpeaker.Services
             if (!arg.Reason.Equals(TrackEndReason.Finished)) { return; }
             LavaPlayer player = arg.Player;
             // Queue completed
-            if (!player.Queue.TryDequeue(out var queueable)) { return; }
+            if (!player.Queue.TryDequeue(out var queueable)) {
+                // Start auto disconnect task once queue is empty
+                _ = InitiateDisconnectAsync(arg.Player, TimeSpan.FromSeconds(20));
+                return;
+            }
             // Next item in queue is not a track
             if (!(queueable is LavaTrack track)) {
                 await player.TextChannel.SendMessageAsync($"`{ queueable.Title }` is not a track. Skipping it...");
@@ -96,6 +115,21 @@ namespace DenverSpeaker.Services
             embedTrack.AddField("Duration", track.Duration, true);
             embedTrack.ThumbnailUrl = await track.FetchArtworkAsync();
             await arg.Player.TextChannel.SendMessageAsync(null, false, embedTrack.Build());
+        }
+
+        private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeSpan) {
+            // All disconnect logic
+            if (!disconnTokens.TryGetValue(player.VoiceChannel.Id, out var value)) {
+                value = new CancellationTokenSource();
+                disconnTokens.TryAdd(player.VoiceChannel.Id, value);
+            } else if (value.IsCancellationRequested) {
+                disconnTokens.TryUpdate(player.VoiceChannel.Id, new CancellationTokenSource(), value);
+                value = disconnTokens[player.VoiceChannel.Id];
+            }
+            // Initiate auto disconnect
+            var isCancelled = SpinWait.SpinUntil(() => value.IsCancellationRequested, timeSpan);
+            if (isCancelled) { return; }
+            await lavaNode.LeaveAsync(player.VoiceChannel);
         }
 
         private async Task lavaClient_OnTrackStuck(TrackStuckEventArgs arg) {
