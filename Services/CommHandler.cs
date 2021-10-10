@@ -136,22 +136,18 @@ namespace DenverSpeaker.Services
             try {
                 // Skip current track when its stucked
                 await arg.Player.SkipAsync();
-            } catch (Exception excep) { Console.WriteLine(excep.Message); } 
-            finally {
-                // Re-added track to queue after throwing an exception
-                arg.Player.Queue.Enqueue(arg.Track);
-            }
+            } catch (Exception excep) { Console.WriteLine(excep.Message); }
+            // Re-added track to queue after throwing an exception
+            finally { arg.Player.Queue.Enqueue(arg.Track); }
         }
 
         private async Task lavaClient_OnTrackException(TrackExceptionEventArgs arg) {
             try {
                 // Skip current track when its stucked
                 await arg.Player.SkipAsync();
-            } catch (Exception excep) { Console.WriteLine(excep.Message); } 
-            finally {
-                // Re-added track to queue after throwing an exception
-                arg.Player.Queue.Enqueue(arg.Track);
-            }
+            } catch (Exception excep) { Console.WriteLine(excep.Message); }
+            // Re-added track to queue after throwing an exception
+            finally { arg.Player.Queue.Enqueue(arg.Track); }
         }
     }
 }

@@ -18,3 +18,12 @@ services:
         restart: always
         depends_on:
             - lavalink
+    dtogether:
+        container_name: dtogether
+        image: dtogether:latest
+        ports:
+            - '8080:8080'
+        build:
+            context: ./
+            dockerfile: ./DiscordTogether/Dockerfile
+        restart: always
