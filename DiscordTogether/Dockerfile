@@ -10,7 +10,6 @@ WORKDIR /app
 COPY ./DiscordTogether/package*.json ./
 
 RUN npm ci --only=production
-RUN npm install jquery
 
 # Bundle app source
 COPY ./DiscordTogether/ .

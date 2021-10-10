@@ -33,13 +33,8 @@ declare class DiscordTogether<T extends {
         youtube: string;
         youtubedev: string;
         poker: string;
-        betrayal: string;
-        fishing: string;
         chess: string;
         chessdev: string;
-        lettertile: string;
-        wordsnack: string;
-        doodlecrew: string;
     } & T;
     /**
      * Create a Youtube Together invite code (note: send the invite using markdown link)
@@ -59,13 +54,8 @@ declare class DiscordTogether<T extends {
         youtube: string;
         youtubedev: string;
         poker: string;
-        betrayal: string;
-        fishing: string;
         chess: string;
         chessdev: string;
-        lettertile: string;
-        wordsnack: string;
-        doodlecrew: string;
     } & T)): Promise<{
         code: string;
     }>;
