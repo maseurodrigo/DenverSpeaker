@@ -48,5 +48,17 @@ namespace DenverSpeaker.Modules
             // Reply with the embed
             await ReplyAsync(null, false, embedBuilder.Build());
         }
+
+        [Command("ytparty")]
+        [Summary("Watch YouTube videos with other users on a voice channel")]
+        public async Task discTogether_YTParty() { await Task.CompletedTask; }
+
+        [Command("poker")]
+        [Summary("Play a poker game with other users on a voice channel")]
+        public async Task discTogether_Poker() { await Task.CompletedTask; }
+
+        [Command("chess")]
+        [Summary("Play a chess game with other users on a voice channel")]
+        public async Task discTogether_Chess() { await Task.CompletedTask; }
     }
 }

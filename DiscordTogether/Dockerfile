@@ -7,11 +7,9 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Install app dependencies
-COPY ./DiscordTogether/package*.json ./
-
 RUN npm install -g npm@8.0.0
-RUN npm audit fix --force
-RUN npm install --production
+RUN npm install discord-together@latest
+RUN npm install discord.js@latest
 
 # Bundle app source
 COPY ./DiscordTogether/ .
