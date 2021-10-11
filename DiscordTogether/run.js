@@ -5,10 +5,8 @@ const { DiscordTogether } = require('./index.js');
 var BotData = require('./BotData.json');
 
 client.discordTogether = new DiscordTogether(client);
-const notConnected = new MessageEmbed().setColor('#EF5350')
-    .setDescription("I can't invite you to Narnia, please join a voice channel");
+const notConnected = new MessageEmbed().setColor('#EF5350').setDescription("I can't invite you to Narnia, please join a voice channel");
 
-// 'message' for Discord.js v12
 client.on('messageCreate', async message => {
     if (message.content === BotData.DiscordBotPrefix.concat('ytparty')) {
         // If user isnt present in any voice channel

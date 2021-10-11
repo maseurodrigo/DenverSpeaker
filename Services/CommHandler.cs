@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using DenverSpeaker.Data;
 using Discord;
 using Discord.Addons.Interactive;
@@ -72,7 +73,7 @@ namespace DenverSpeaker.Services
             } catch (NullReferenceException excep) {
                 Console.WriteLine(excep.Message);
                 await Task.CompletedTask;
-            }
+            } catch (KeyNotFoundException) { await Task.CompletedTask; }
         }
 
         private async Task botLogEvents(LogMessage arg) { 
