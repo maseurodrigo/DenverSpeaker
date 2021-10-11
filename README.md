@@ -13,7 +13,10 @@
 | **leave** |  | Disconnect the bot from the current voice channel |
 | **queue** |  | List all the tracks that are currently on queue |
 | **lyrics** |  | Searching for current track lyrics |
-  
+| **ytparty** |  | Watch YouTube videos with other users on a voice channel |
+| **poker** |  | Play a poker game with other users on a voice channel |
+| **chess** |  | Play a chess game with other users on a voice channel |
+
 ```json
 {
   "DiscordBotPrefix": "!",
