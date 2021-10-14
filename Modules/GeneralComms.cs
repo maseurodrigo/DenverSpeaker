@@ -50,15 +50,19 @@ namespace DenverSpeaker.Modules
         }
 
         [Command("ytparty")]
-        [Summary("Watch YouTube videos with other users on a voice channel")]
+        [Summary("Watch **YouTube** videos with other users on a voice channel")]
         public async Task discTogether_YTParty() { await Task.CompletedTask; }
 
         [Command("poker")]
-        [Summary("Play a poker game with other users on a voice channel")]
+        [Summary("Play a **Poker** game with other users on a voice channel")]
         public async Task discTogether_Poker() { await Task.CompletedTask; }
 
         [Command("chess")]
-        [Summary("Play a chess game with other users on a voice channel")]
+        [Summary("Play a **Chess** game with other users on a voice channel")]
         public async Task discTogether_Chess() { await Task.CompletedTask; }
+
+        [Command("betray")]
+        [Summary("Play a **Betrayal** game with other users on a voice channel")]
+        public async Task discTogether_Betrayal() { await Task.CompletedTask; }
     }
 }

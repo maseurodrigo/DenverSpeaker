@@ -31,10 +31,9 @@ declare class DiscordTogether<T extends {
     client: string;
     applications: {
         youtube: string;
-        youtubedev: string;
         poker: string;
+        betrayal: string;
         chess: string;
-        chessdev: string;
     } & T;
     /**
      * Create a Youtube Together invite code (note: send the invite using markdown link)
@@ -52,10 +51,9 @@ declare class DiscordTogether<T extends {
      */
     createTogetherCode(voiceChannelId: string, option: keyof ({
         youtube: string;
-        youtubedev: string;
         poker: string;
+        betrayal: string;
         chess: string;
-        chessdev: string;
     } & T)): Promise<{
         code: string;
     }>;

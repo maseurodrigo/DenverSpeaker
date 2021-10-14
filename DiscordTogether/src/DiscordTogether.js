@@ -2,11 +2,10 @@ const fetch = require('node-fetch');
 const { Client } = require('discord.js');
 
 const defaultApplications = {
-  youtube: '880218394199220334', // Note : First package to include the new YouTube Together version, any other package offering it will be clearly inspired by it
-  youtubedev: '880218832743055411', // Note : First package to include the new YouTube Together development version, any other package offering it will be clearly inspired by it
-  poker: '755827207812677713',
-  chess: '832012774040141894', // Note : First package to offer chess, any other package offering it will be clearly inspired by it
-  chessdev: '832012586023256104' // Note : First package to offer chessDev, any other package offering it will be clearly inspired by it
+    youtube: '880218394199220334',
+    poker: '755827207812677713',
+    betrayal: '773336526917861400',
+    chess: '832012774040141894'
 };
 
 /**
