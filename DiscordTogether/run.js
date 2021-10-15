@@ -40,6 +40,14 @@ client.on('messageCreate', async message => {
                 return message.reply(`${invite.code}`).then(msg => { setTimeout(() => msg.delete(), 10000) });
             });
         } else { message.reply({ embeds: [notConnected] }); };
+    } else if (message.content === BotData.DiscordBotPrefix.concat('doodle')) {
+        // If user isnt present in any voice channel
+        if (message.member.voice.channel) {
+            client.discordTogether.createTogetherCode(message.member.voice.channel.id, 'doodlecrew').then(async invite => {
+                console.log(`${message.member.voice.channel.id}: ${message.content}`);
+                return message.reply(`${invite.code}`).then(msg => { setTimeout(() => msg.delete(), 10000) });
+            });
+        } else { message.reply({ embeds: [notConnected] }); };
     };
 });
 

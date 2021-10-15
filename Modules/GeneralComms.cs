@@ -64,5 +64,9 @@ namespace DenverSpeaker.Modules
         [Command("betray")]
         [Summary("Play a **Betrayal** game with other users on a voice channel")]
         public async Task discTogether_Betrayal() { await Task.CompletedTask; }
+
+        [Command("doodle")]
+        [Summary("Play a **Doodle Crew** game with other users on a voice channel")]
+        public async Task discTogether_DoodleCrew() { await Task.CompletedTask; }
     }
 }
