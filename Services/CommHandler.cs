@@ -66,9 +66,13 @@ namespace DenverSpeaker.Services
         private async Task client_UserVoiceStateUpdated(SocketUser argUser, SocketVoiceState argFrom, SocketVoiceState argTo) {
             try {
                 // LavaNode leaves vchannel when last user leaves that specific channel
-                if(lavaNode.IsConnected && !(argFrom.VoiceChannel is null)) {
-                    if (!argUser.Id.Equals(discordClient.CurrentUser.Id) && argFrom.VoiceChannel.Users.Count.Equals(1))
+                if(lavaNode.IsConnected && argFrom.VoiceChannel is not null) {
+                    if (!argUser.Id.Equals(discordClient.CurrentUser.Id) && argFrom.VoiceChannel.Users.Count.Equals(1)) {
                         await lavaNode.LeaveAsync(lavaNode.GetPlayer(argFrom.VoiceChannel.Guild).VoiceChannel);
+                    } else if (argUser.Id.Equals(discordClient.CurrentUser.Id)) {
+                        await lavaNode.LeaveAsync(argFrom.VoiceChannel);
+                        Console.WriteLine($"{ discordClient.CurrentUser.Username } disconnected");
+                    }
                 }
             } catch (NullReferenceException excep) {
                 Console.WriteLine(excep.Message);

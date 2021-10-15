@@ -7,7 +7,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Install app dependencies
-RUN npm install -g npm@8.0.0
+RUN npm install -g npm@8.1.0
 RUN npm install discord-together@latest
 RUN npm install discord.js@latest
 

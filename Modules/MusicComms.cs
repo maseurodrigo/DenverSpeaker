@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
@@ -393,47 +391,6 @@ namespace DenverSpeaker.Modules
             foreach (LavaTrack track in currentPlayer.Queue) 
                 embedQueueTracks.AddField(track.Title, track.Author, false);
             await ReplyAsync(null, false, embedQueueTracks.Build(), null, null, new MessageReference(Context.Message.Id));
-        }
-
-        [Command("lyrics")]
-        [RequireBotPermission(ChannelPermission.SendMessages)]
-        [Summary("Searching for current track lyrics")]
-        public async Task getTrackLyrics() {
-            // Current track lyrics embed
-            EmbedBuilder embedLyrics = new EmbedBuilder();
-            embedLyrics.Color = embedsColor;
-            try {
-                // User nor bot it's not present on any voice channel
-                IVoiceState voiceState = Context.User as IVoiceState;
-                if (voiceState?.VoiceChannel is null) { return; }
-                if (!lavaNode.TryGetPlayer(Context.Guild, out LavaPlayer currentPlayer)) { return; }
-                // User in a different vchannel than bot
-                if (!voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
-                // Player its not playing
-                if (!currentPlayer.PlayerState.Equals(PlayerState.Playing)) { return; }
-                String lyrics = await currentPlayer.Track.FetchLyricsFromGeniusAsync();
-                if (String.IsNullOrWhiteSpace(lyrics)) { return; }
-                String[] splitLyrics = lyrics.Split('\n');
-                StringBuilder stringBuilder = new StringBuilder();
-                foreach (var line in splitLyrics) {
-                    if (enumRange.Contains(stringBuilder.Length)) {
-                        embedLyrics.Title = currentPlayer.Track.Title;
-                        embedLyrics.Description = $"```{stringBuilder}```";
-                        await ReplyAsync(null, false, embedLyrics.Build(), null, null, new MessageReference(Context.Message.Id));
-                        stringBuilder.Clear();
-                    } else stringBuilder.AppendLine(line);
-                }
-                embedLyrics.Title = currentPlayer.Track.Title;
-                embedLyrics.Description = $"```{stringBuilder}```";
-            } catch (HttpRequestException) {
-                embedLyrics.Description = "Don't ask me how, but i didn't find anything for this track";
-            } catch (ArgumentOutOfRangeException) {
-                embedLyrics.Description = "Sorry boss, but the lyrics for this track are a little weird and i can't present it";
-            } catch (IndexOutOfRangeException excep) {
-                await ReplyAsync(excep.Message);
-            } finally {
-                await ReplyAsync(null, false, embedLyrics.Build(), null, null, new MessageReference(Context.Message.Id));
-            }
         }
     }
 }
