@@ -12,11 +12,11 @@
 | **stop** |  | Stop discord player and finish the current queue |
 | **leave** |  | Disconnect the bot from the current voice channel |
 | **queue** |  | List all the tracks that are currently on queue |
-| **lyrics** |  | Searching for current track lyrics |
 | **ytparty** |  | Watch **YouTube** videos with other users on a voice channel |
 | **poker** |  | Play a **Poker** game with other users on a voice channel |
 | **chess** |  | Play a **Chess** game with other users on a voice channel |
 | **betray** |  | Play a **Betrayal** game with other users on a voice channel |
+| **doodle** |  | Play a **Doodle Crew** game with other users on a voice channel |
 
 ```json
 {
