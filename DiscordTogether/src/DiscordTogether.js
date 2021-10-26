@@ -6,7 +6,8 @@ const defaultApplications = {
     poker: '755827207812677713',
     betrayal: '773336526917861400',
     chess: '832012774040141894',
-    doodlecrew: '878067389634314250'
+    doodlecrew: '878067389634314250',
+    spellcast: '852509694341283871'
 };
 
 /**
