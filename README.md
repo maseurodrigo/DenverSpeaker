@@ -17,6 +17,7 @@
 | **chess** |  | Play a **Chess** game with other users on a voice channel |
 | **betray** |  | Play a **Betrayal** game with other users on a voice channel |
 | **doodle** |  | Play a **Doodle Crew** game with other users on a voice channel |
+| **spellcast** |  | Play a **Spell Cast** game with other users on a voice channel |
 
 ```json
 {
