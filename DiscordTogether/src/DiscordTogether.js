@@ -1,14 +1,7 @@
 const fetch = require('node-fetch');
 const { Client } = require('discord.js');
 
-const defaultApplications = {
-    youtube: '880218394199220334',
-    poker: '755827207812677713',
-    betrayal: '773336526917861400',
-    chess: '832012774040141894',
-    doodlecrew: '878067389634314250',
-    spellcast: '852509694341283871'
-};
+const defaultApplications = { youtube: '880218394199220334' };
 
 /**
  * Class symbolizing a YoutubeTogether
