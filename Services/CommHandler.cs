@@ -113,7 +113,7 @@ namespace DenverSpeaker.Services
             await arg.Player.PlayAsync(track);
             // Next track embed details
             EmbedBuilder embedTrack = new EmbedBuilder();
-            embedTrack.Color = new Color(244, 67, 54);
+            embedTrack.Color = new Color(239, 83, 80);
             embedTrack.Title = "Playing now...";
             embedTrack.AddField("Name", track.Title, false);
             embedTrack.AddField("Author", track.Author, true);

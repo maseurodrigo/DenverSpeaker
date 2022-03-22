@@ -68,35 +68,31 @@ namespace DenverSpeaker.Modules
         [RequireBotPermission(ChannelPermission.SendMessages)]
         [Summary("Start playing a music or playlist from the given url")]
         public async Task playURLAsync([Remainder][Summary("URL")] String _url) {
+            EmbedBuilder playURLEmbed = new EmbedBuilder();
+            playURLEmbed.Color = embedsColor;
             // Remove white spaces from query
             _url = _url.Trim();
             // Parse URL params.
             NameValueCollection qString = HttpUtility.ParseQueryString(_url);
             // Checking if query string its an URL
             if (!Uri.IsWellFormedUriString(_url, UriKind.Absolute)) {
-                EmbedBuilder noURLs = new EmbedBuilder();
-                noURLs.Color = embedsColor;
-                noURLs.Description = "For this command its needed a valid URL\nYou can use `yt` or `sc` for searching";
-                await ReplyAsync(null, false, noURLs.Build(), null, null, new MessageReference(Context.Message.Id));
+                playURLEmbed.Description = "For this command its needed a valid URL!\nYou can use `yt` or `sc` for searching";
+                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             } else if (!String.IsNullOrWhiteSpace(qString.Get("list"))) {
                 if(qString.Count > 1) {
-                    EmbedBuilder noValidPlaylist = new EmbedBuilder();
-                    noValidPlaylist.Color = embedsColor;
-                    noValidPlaylist.Description = "This link doesnt correspond to a valid playlist";
-                    await ReplyAsync(null, false, noValidPlaylist.Build(), null, null, new MessageReference(Context.Message.Id));
+                    playURLEmbed.Description = "This link doesnt correspond to a valid playlist";
+                    await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                     return;
                 }
             }
             IVoiceState voiceState = Context.User as IVoiceState;
             // Lava client it's not present on any voice channel
             if (!lavaNode.HasPlayer(Context.Guild)) {
-                EmbedBuilder botVChannel = new EmbedBuilder();
-                botVChannel.Color = embedsColor;
                 // User it's not present on any voice channel
                 if (voiceState?.VoiceChannel is null) {
-                    botVChannel.Description = $"I can't join you in Narnia, please join a voice channel";
-                    await ReplyAsync(null, false, botVChannel.Build(), null, null, new MessageReference(Context.Message.Id));
+                    playURLEmbed.Description = $"I can't join you in Narnia, please join a voice channel";
+                    await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                     return;
                 }
                 try { await lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel); } 
@@ -110,10 +106,8 @@ namespace DenverSpeaker.Modules
             SearchResponse searchResp = await lavaNode.SearchAsync(SearchType.Direct, _url);
             // Couldnt find anything for the query param given
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
-                EmbedBuilder noMatches = new EmbedBuilder();
-                noMatches.Color = embedsColor;
-                noMatches.Description = $"I didn't find anything for `{ _url }`";
-                await ReplyAsync(null, false, noMatches.Build(), null, null, new MessageReference(Context.Message.Id));
+                playURLEmbed.Description = $"I didn't find anything for `{ _url }`";
+                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
             // If LavaPlayer its active (Playing/Paused)
@@ -122,41 +116,33 @@ namespace DenverSpeaker.Modules
                 if (!String.IsNullOrWhiteSpace(searchResp.Playlist.Name)) {
                     foreach (var track in searchResp.Tracks) { currentPlayer.Queue.Enqueue(track); }
                     // Enqueued track embed
-                    EmbedBuilder inQueue = new EmbedBuilder();
-                    inQueue.Color = embedsColor;
-                    inQueue.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
-                    await ReplyAsync(null, false, inQueue.Build());
+                    playURLEmbed.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
+                    await ReplyAsync(null, false, playURLEmbed.Build());
                 } else {
                     LavaTrack track = searchResp.Tracks.ElementAt(0);
                     currentPlayer.Queue.Enqueue(track);
                     // Enqueued track embed
-                    EmbedBuilder enQueued = new EmbedBuilder();
-                    enQueued.Color = embedsColor;
-                    enQueued.Description = $"Enqueued: `{ track.Title }`";
-                    await ReplyAsync(null, false, enQueued.Build());
+                    playURLEmbed.Description = $"Enqueued: `{ track.Title }`";
+                    await ReplyAsync(null, false, playURLEmbed.Build());
                 }
             } else {
                 // If its a playlist
                 if (!String.IsNullOrWhiteSpace(searchResp.Playlist.Name)) {
                     foreach (LavaTrack track in searchResp.Tracks.Skip(1)) { currentPlayer.Queue.Enqueue(track); }
                     // Enqueued track embed
-                    EmbedBuilder inQueue = new EmbedBuilder();
-                    inQueue.Color = embedsColor;
-                    inQueue.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
-                    await ReplyAsync(null, false, inQueue.Build());
+                    playURLEmbed.Description = $"Currently `{ searchResp.Tracks.Count }` tracks in queue";
+                    await ReplyAsync(null, false, playURLEmbed.Build());
                 }
                 // Get first enqueued track
                 LavaTrack startTrack = searchResp.Tracks.ElementAt(0);
                 await currentPlayer.PlayAsync(startTrack);
                 // Next track embed details
-                EmbedBuilder embedTrack = new EmbedBuilder();
-                embedTrack.Color = embedsColor;
-                embedTrack.Title = "Playing now...";
-                embedTrack.AddField("Name", startTrack.Title, false);
-                embedTrack.AddField("Author", startTrack.Author, true);
-                embedTrack.AddField("Duration", startTrack.Duration, true);
-                embedTrack.ThumbnailUrl = await startTrack.FetchArtworkAsync();
-                await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
+                playURLEmbed.Title = "Playing now...";
+                playURLEmbed.AddField("Name", startTrack.Title, false);
+                playURLEmbed.AddField("Author", startTrack.Author, true);
+                playURLEmbed.AddField("Duration", startTrack.Duration, true);
+                playURLEmbed.ThumbnailUrl = await startTrack.FetchArtworkAsync();
+                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
             }
         }
 
@@ -165,25 +151,23 @@ namespace DenverSpeaker.Modules
         [RequireBotPermission(ChannelPermission.SendMessages)]
         [Summary("Start playing a music from YouTube")]
         public async Task playYouTubeAsync([Remainder][Summary("YouTube query")] String _ytQuery) {
+            EmbedBuilder playYTEmbed = new EmbedBuilder();
+            playYTEmbed.Color = embedsColor;
             // Remove white spaces from query
             _ytQuery = _ytQuery.Trim();
             // Checking if query string its an URL
             if (Uri.IsWellFormedUriString(_ytQuery, UriKind.Absolute)) {
-                EmbedBuilder noURLs = new EmbedBuilder();
-                noURLs.Color = embedsColor;
-                noURLs.Description = "Use the `play` command to use links";
-                await ReplyAsync(null, false, noURLs.Build(), null, null, new MessageReference(Context.Message.Id));
+                playYTEmbed.Description = "Use the `play` command to use links";
+                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
             IVoiceState voiceState = Context.User as IVoiceState;
             // Lava client it's not present on any voice channel
             if (!lavaNode.HasPlayer(Context.Guild)) {
-                EmbedBuilder botVChannel = new EmbedBuilder();
-                botVChannel.Color = embedsColor;
                 // User it's not present on any voice channel
                 if (voiceState?.VoiceChannel is null) {
-                    botVChannel.Description = $"I can't join you in Narnia, please join a voice channel";
-                    await ReplyAsync(null, false, botVChannel.Build(), null, null, new MessageReference(Context.Message.Id));
+                    playYTEmbed.Description = $"I can't join you in Narnia, please join a voice channel";
+                    await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                     return;
                 }
                 try { await lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel); } 
@@ -197,10 +181,8 @@ namespace DenverSpeaker.Modules
             SearchResponse searchResp = await lavaNode.SearchYouTubeAsync(_ytQuery);
             // Couldnt find anything for the query param given
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
-                EmbedBuilder noMatches = new EmbedBuilder();
-                noMatches.Color = embedsColor;
-                noMatches.Description = $"I didn't find anything about `{ _ytQuery }` on YouTube, but I can look it up in Narnia";
-                await ReplyAsync(null, false, noMatches.Build(), null, null, new MessageReference(Context.Message.Id));
+                playYTEmbed.Description = $"I didn't find anything about `{ _ytQuery }` on YouTube, but I can look it up in Narnia";
+                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
             // If LavaPlayer its active (Playing/Paused)
@@ -208,23 +190,19 @@ namespace DenverSpeaker.Modules
                 LavaTrack track = searchResp.Tracks.ElementAt(0);
                 currentPlayer.Queue.Enqueue(track);
                 // Enqueued track embed
-                EmbedBuilder enQueued = new EmbedBuilder();
-                enQueued.Color = embedsColor;
-                enQueued.Description = $"Enqueued: `{ track.Title }`";
-                await ReplyAsync(null, false, enQueued.Build());
+                playYTEmbed.Description = $"Enqueued: `{ track.Title }`";
+                await ReplyAsync(null, false, playYTEmbed.Build());
             } else {
                 // When LavaPlayer its idle trigger a PlayAsync
                 LavaTrack track = searchResp.Tracks.ElementAt(0);
                 await currentPlayer.PlayAsync(track);
                 // Next track embed details
-                EmbedBuilder embedTrack = new EmbedBuilder();
-                embedTrack.Color = embedsColor;
-                embedTrack.Title = "Playing now...";
-                embedTrack.AddField("Name", track.Title, false);
-                embedTrack.AddField("Author", track.Author, true);
-                embedTrack.AddField("Duration", track.Duration, true);
-                embedTrack.ThumbnailUrl = await track.FetchArtworkAsync();
-                await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
+                playYTEmbed.Title = "Playing now...";
+                playYTEmbed.AddField("Name", track.Title, false);
+                playYTEmbed.AddField("Author", track.Author, true);
+                playYTEmbed.AddField("Duration", track.Duration, true);
+                playYTEmbed.ThumbnailUrl = await track.FetchArtworkAsync();
+                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
             }
         }
 
@@ -233,25 +211,23 @@ namespace DenverSpeaker.Modules
         [RequireBotPermission(ChannelPermission.SendMessages)]
         [Summary("Start playing a music from SoundCloud")]
         public async Task playSoundCloudAsync([Remainder][Summary("SoundCloud query")] String _ytQuery) {
+            EmbedBuilder playSCEmbed = new EmbedBuilder();
+            playSCEmbed.Color = embedsColor;
             // Remove white spaces from query
             _ytQuery = _ytQuery.Trim();
             // Checking if query string its an URL
             if (Uri.IsWellFormedUriString(_ytQuery, UriKind.Absolute)) {
-                EmbedBuilder noURLs = new EmbedBuilder();
-                noURLs.Color = embedsColor;
-                noURLs.Description = "Use the `play` command to use links";
-                await ReplyAsync(null, false, noURLs.Build(), null, null, new MessageReference(Context.Message.Id));
+                playSCEmbed.Description = "Use the `play` command to use links";
+                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
             IVoiceState voiceState = Context.User as IVoiceState;
             // Lava client it's not present on any voice channel
             if (!lavaNode.HasPlayer(Context.Guild)) {
-                EmbedBuilder botVChannel = new EmbedBuilder();
-                botVChannel.Color = embedsColor;
                 // User it's not present on any voice channel
                 if (voiceState?.VoiceChannel is null) {
-                    botVChannel.Description = $"I can't join you in Narnia, please join a voice channel";
-                    await ReplyAsync(null, false, botVChannel.Build(), null, null, new MessageReference(Context.Message.Id));
+                    playSCEmbed.Description = $"I can't join you in Narnia, please join a voice channel";
+                    await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                     return;
                 }
                 try { await lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel); } 
@@ -265,10 +241,8 @@ namespace DenverSpeaker.Modules
             SearchResponse searchResp = await lavaNode.SearchSoundCloudAsync(_ytQuery);
             // Couldnt find anything for the query param given
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
-                EmbedBuilder noMatches = new EmbedBuilder();
-                noMatches.Color = embedsColor;
-                noMatches.Description = $"I didn't find anything about `{ _ytQuery }` on SoundCloud, but I can look it up in Narnia";
-                await ReplyAsync(null, false, noMatches.Build(), null, null, new MessageReference(Context.Message.Id));
+                playSCEmbed.Description = $"I didn't find anything about `{ _ytQuery }` on SoundCloud, but I can look it up in Narnia";
+                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
                 return;
             }
             // If LavaPlayer its active (Playing/Paused)
@@ -277,23 +251,19 @@ namespace DenverSpeaker.Modules
                 LavaTrack track = searchResp.Tracks.ElementAt(0);
                 currentPlayer.Queue.Enqueue(track);
                 // Enqueued track embed
-                EmbedBuilder enQueued = new EmbedBuilder();
-                enQueued.Color = embedsColor;
-                enQueued.Description = $"Enqueued: `{ track.Title }`";
-                await ReplyAsync(null, false, enQueued.Build());
+                playSCEmbed.Description = $"Enqueued: `{ track.Title }`";
+                await ReplyAsync(null, false, playSCEmbed.Build());
             } else {
                 // When LavaPlayer its idle trigger a PlayAsync
                 LavaTrack track = searchResp.Tracks.ElementAt(0);
                 await currentPlayer.PlayAsync(track);
                 // Next track embed details
-                EmbedBuilder embedTrack = new EmbedBuilder();
-                embedTrack.Color = embedsColor;
-                embedTrack.Title = "Playing now...";
-                embedTrack.AddField("Name", track.Title, false);
-                embedTrack.AddField("Author", track.Author, true);
-                embedTrack.AddField("Duration", track.Duration, true);
-                embedTrack.ThumbnailUrl = await track.FetchArtworkAsync();
-                await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
+                playSCEmbed.Title = "Playing now...";
+                playSCEmbed.AddField("Name", track.Title, false);
+                playSCEmbed.AddField("Author", track.Author, true);
+                playSCEmbed.AddField("Duration", track.Duration, true);
+                playSCEmbed.ThumbnailUrl = await track.FetchArtworkAsync();
+                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
             }
         }
 
@@ -386,10 +356,12 @@ namespace DenverSpeaker.Modules
             // Queue tracks list embed
             EmbedBuilder embedQueueTracks = new EmbedBuilder();
             embedQueueTracks.Color = embedsColor;
-            embedQueueTracks.Title = $"Queue: `{ currentPlayer.Queue.Count }` tracks";
-            // Loop through all track in queue
-            foreach (LavaTrack track in currentPlayer.Queue) 
-                embedQueueTracks.AddField(track.Title, track.Author, false);
+            if (currentPlayer.Queue.Count.Equals(0)) { embedQueueTracks.Description = "Currently, theres no tracks in queue"; } 
+            else {
+                embedQueueTracks.Title = $"Queue: `{ currentPlayer.Queue.Count }` tracks";
+                // Loop through all track in queue
+                foreach (LavaTrack track in currentPlayer.Queue) embedQueueTracks.AddField(track.Title, track.Author, false);
+            }
             await ReplyAsync(null, false, embedQueueTracks.Build(), null, null, new MessageReference(Context.Message.Id));
         }
     }
