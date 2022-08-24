@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using DenverSpeaker.Data;
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Victoria;
@@ -19,17 +18,14 @@ namespace DenverSpeaker.Services
         // Discord default vars.
         public static DiscordSocketClient discordClient { get; set; }
         public static CommandService discordCommands { get; set; }
-        public static InteractiveService discordInteractive { get; set; }
         public static IServiceProvider discordService { get; set; }
         public static LavaNode lavaNode { get; set; }
         public static BotData botData { get; set; }
         private readonly ConcurrentDictionary<ulong, CancellationTokenSource> disconnTokens;
 
-        public CommHandler(DiscordSocketClient _discordClient, CommandService _discordCommands, InteractiveService _discordInteractive,
-            IServiceProvider _discordService, LavaNode _lavaNode, BotData _botData) {
+        public CommHandler(DiscordSocketClient _discordClient, CommandService _discordCommands, IServiceProvider _discordService, LavaNode _lavaNode, BotData _botData) {
             discordClient = _discordClient;
             discordCommands = _discordCommands;
-            discordInteractive = _discordInteractive;
             discordService = _discordService;
             lavaNode = _lavaNode;
             botData = _botData;

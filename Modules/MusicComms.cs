@@ -5,20 +5,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
-using Discord.Addons.Interactive;
+using Discord.WebSocket;
+using Discord.Interactions;
 using Discord.Commands;
 using Victoria;
 using Victoria.Enums;
 using Victoria.Responses.Search;
 
+using SummaryAttribute = Discord.Commands.SummaryAttribute;
+using RequireUserPermissionAttribute = Discord.Commands.RequireUserPermissionAttribute;
+using RequireBotPermissionAttribute = Discord.Commands.RequireBotPermissionAttribute;
+
 namespace DenverSpeaker.Modules
 {
     [Summary("Music Discord Commands")]
-    public class MusicComms : InteractiveBase
+    public class MusicComms : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
     {
         // Getting all services through constructor param with AddSingleton()
         private readonly LavaNode lavaNode;
-        private static readonly IEnumerable<int> enumRange = Enumerable.Range(1900, 2000);
         private static readonly Color embedsColor = new Color(239, 83, 80);
         private MusicComms(LavaNode _lavaNode) => lavaNode = _lavaNode;
 
@@ -43,14 +47,14 @@ namespace DenverSpeaker.Modules
             // Lava client it's not present on any voice channel
             if (!lavaNode.HasPlayer(Context.Guild)) {
                 userVChannel.Description = $"I'm not connected to any voice channel";
-                await ReplyAsync(null, false, userVChannel.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, userVChannel.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             // User it's not present on any voice channel
             IVoiceState voiceState = Context.User as IVoiceState;
             if (voiceState?.VoiceChannel is null) {
                 userVChannel.Description = $"I don't accept orders from Narnia, please join a voice channel";
-                await ReplyAsync(null, false, userVChannel.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, userVChannel.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             // Assign LavaPlayer to the current discord server
@@ -58,7 +62,7 @@ namespace DenverSpeaker.Modules
             // User in a different vchannel than bot
             if (!voiceState.VoiceChannel.Equals(currentPlayer.VoiceChannel)) { return; }
             try {
-                await Context.Message.AddReactionAsync(new Emoji("👋")); // Leave emoji reaction
+                await Context.Interaction.Message.AddReactionAsync(new Emoji("👋")); // Leave emoji reaction
                 await lavaNode.LeaveAsync(voiceState.VoiceChannel);
             } catch (Exception exception) { await ReplyAsync(exception.Message); }
         }
@@ -77,12 +81,12 @@ namespace DenverSpeaker.Modules
             // Checking if query string its an URL
             if (!Uri.IsWellFormedUriString(_url, UriKind.Absolute)) {
                 playURLEmbed.Description = "For this command its needed a valid URL!\nYou can use `yt` or `sc` for searching";
-                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             } else if (!String.IsNullOrWhiteSpace(qString.Get("list"))) {
                 if(qString.Count > 1) {
                     playURLEmbed.Description = "This link doesnt correspond to a valid playlist";
-                    await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                    await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                     return;
                 }
             }
@@ -92,7 +96,7 @@ namespace DenverSpeaker.Modules
                 // User it's not present on any voice channel
                 if (voiceState?.VoiceChannel is null) {
                     playURLEmbed.Description = $"I can't join you in Narnia, please join a voice channel";
-                    await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                    await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                     return;
                 }
                 try { await lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel); } 
@@ -107,7 +111,7 @@ namespace DenverSpeaker.Modules
             // Couldnt find anything for the query param given
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
                 playURLEmbed.Description = $"I didn't find anything for `{ _url }`";
-                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             // If LavaPlayer its active (Playing/Paused)
@@ -142,7 +146,7 @@ namespace DenverSpeaker.Modules
                 playURLEmbed.AddField("Author", startTrack.Author, true);
                 playURLEmbed.AddField("Duration", startTrack.Duration, true);
                 playURLEmbed.ThumbnailUrl = await startTrack.FetchArtworkAsync();
-                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playURLEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
             }
         }
 
@@ -158,7 +162,7 @@ namespace DenverSpeaker.Modules
             // Checking if query string its an URL
             if (Uri.IsWellFormedUriString(_ytQuery, UriKind.Absolute)) {
                 playYTEmbed.Description = "Use the `play` command to use links";
-                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             IVoiceState voiceState = Context.User as IVoiceState;
@@ -167,7 +171,7 @@ namespace DenverSpeaker.Modules
                 // User it's not present on any voice channel
                 if (voiceState?.VoiceChannel is null) {
                     playYTEmbed.Description = $"I can't join you in Narnia, please join a voice channel";
-                    await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                    await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                     return;
                 }
                 try { await lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel); } 
@@ -182,7 +186,7 @@ namespace DenverSpeaker.Modules
             // Couldnt find anything for the query param given
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
                 playYTEmbed.Description = $"I didn't find anything about `{ _ytQuery }` on YouTube, but I can look it up in Narnia";
-                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             // If LavaPlayer its active (Playing/Paused)
@@ -202,7 +206,7 @@ namespace DenverSpeaker.Modules
                 playYTEmbed.AddField("Author", track.Author, true);
                 playYTEmbed.AddField("Duration", track.Duration, true);
                 playYTEmbed.ThumbnailUrl = await track.FetchArtworkAsync();
-                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playYTEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
             }
         }
 
@@ -218,7 +222,7 @@ namespace DenverSpeaker.Modules
             // Checking if query string its an URL
             if (Uri.IsWellFormedUriString(_ytQuery, UriKind.Absolute)) {
                 playSCEmbed.Description = "Use the `play` command to use links";
-                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             IVoiceState voiceState = Context.User as IVoiceState;
@@ -227,7 +231,7 @@ namespace DenverSpeaker.Modules
                 // User it's not present on any voice channel
                 if (voiceState?.VoiceChannel is null) {
                     playSCEmbed.Description = $"I can't join you in Narnia, please join a voice channel";
-                    await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                    await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                     return;
                 }
                 try { await lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel); } 
@@ -242,7 +246,7 @@ namespace DenverSpeaker.Modules
             // Couldnt find anything for the query param given
             if (searchResp.Status is SearchStatus.LoadFailed || searchResp.Status is SearchStatus.NoMatches) {
                 playSCEmbed.Description = $"I didn't find anything about `{ _ytQuery }` on SoundCloud, but I can look it up in Narnia";
-                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
                 return;
             }
             // If LavaPlayer its active (Playing/Paused)
@@ -263,7 +267,7 @@ namespace DenverSpeaker.Modules
                 playSCEmbed.AddField("Author", track.Author, true);
                 playSCEmbed.AddField("Duration", track.Duration, true);
                 playSCEmbed.ThumbnailUrl = await track.FetchArtworkAsync();
-                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Message.Id));
+                await ReplyAsync(null, false, playSCEmbed.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
             }
         }
 
@@ -291,8 +295,8 @@ namespace DenverSpeaker.Modules
                 embedTrack.AddField("Author", currentTrack.Author, true);
                 embedTrack.AddField("Duration", currentTrack.Duration, true);
                 embedTrack.ThumbnailUrl = await currentTrack.FetchArtworkAsync();
-                await Context.Message.AddReactionAsync(new Emoji("⏭️")); // Skip emoji reaction
-                await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Message.Id));
+                await Context.Interaction.Message.AddReactionAsync(new Emoji("⏭️")); // Skip emoji reaction
+                await ReplyAsync(null, false, embedTrack.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
             }
         }
 
@@ -309,7 +313,7 @@ namespace DenverSpeaker.Modules
             if (currentPlayer.PlayerState.Equals(PlayerState.Paused) || 
                 currentPlayer.PlayerState.Equals(PlayerState.Stopped)) { return; }
             await currentPlayer.PauseAsync();
-            await Context.Message.AddReactionAsync(new Emoji("⏸️")); // Pause emoji reaction
+            await Context.Interaction.Message.AddReactionAsync(new Emoji("⏸️")); // Pause emoji reaction
         }
 
         [Command("resume")]
@@ -324,7 +328,7 @@ namespace DenverSpeaker.Modules
             // Player its already paused/stopped
             if (currentPlayer.PlayerState.Equals(PlayerState.Playing)) { return; }
             await currentPlayer.ResumeAsync();
-            await Context.Message.AddReactionAsync(new Emoji("⏯️")); // Resume emoji reaction
+            await Context.Interaction.Message.AddReactionAsync(new Emoji("⏯️")); // Resume emoji reaction
         }
 
         [Command("stop")]
@@ -340,7 +344,7 @@ namespace DenverSpeaker.Modules
             if (currentPlayer.PlayerState.Equals(PlayerState.Stopped)) { return; }
             await currentPlayer.StopAsync();
             currentPlayer.Queue.Clear();
-            await Context.Message.AddReactionAsync(new Emoji("⏹️")); // Stop emoji reaction
+            await Context.Interaction.Message.AddReactionAsync(new Emoji("⏹️")); // Stop emoji reaction
         }
 
         [Command("queue")]
@@ -362,7 +366,7 @@ namespace DenverSpeaker.Modules
                 // Loop through all track in queue
                 foreach (LavaTrack track in currentPlayer.Queue) embedQueueTracks.AddField(track.Title, track.Author, false);
             }
-            await ReplyAsync(null, false, embedQueueTracks.Build(), null, null, new MessageReference(Context.Message.Id));
+            await ReplyAsync(null, false, embedQueueTracks.Build(), null, null, new MessageReference(Context.Interaction.Message.Id));
         }
     }
 }

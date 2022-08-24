@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using DenverSpeaker.Data;
@@ -33,7 +32,6 @@ namespace DenverSpeaker
                 discordService
                     .AddSingleton(discordClient)
                     .AddSingleton(new CommandService(serviceConfig))
-                    .AddSingleton(new InteractiveService(discordClient))
                     .AddSingleton<BotService>()
                     .AddLavaNode(client => {
                         client.Port = 2333;

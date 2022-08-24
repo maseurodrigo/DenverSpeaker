@@ -49,8 +49,6 @@ namespace DenverSpeaker.Modules
             await ReplyAsync(null, false, embedBuilder.Build());
         }
 
-        [Command("ytparty")]
-        [Summary("Watch **YouTube** videos with other users on a voice channel")]
-        public async Task discTogether_YTParty() { await Task.CompletedTask; }
+        [Command("ytparty")][Summary("Watch **YouTube** videos with other users on a voice channel")] public async Task discTogether_YTParty() { await Task.CompletedTask; }
     }
 }
