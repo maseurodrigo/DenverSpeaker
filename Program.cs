@@ -18,14 +18,10 @@ namespace DenverSpeaker
 
         public static async Task BotKeepAsync() {
             // Discord client configurations
-            DiscordSocketClient discordClient = new DiscordSocketClient(new DiscordSocketConfig() { LogLevel = LogSeverity.Info });
             ServiceCollection discordService = new ServiceCollection();
-            CommandServiceConfig serviceConfig = new CommandServiceConfig() {
-                DefaultRunMode = RunMode.Async,
-                CaseSensitiveCommands = false,
-                IgnoreExtraArgs = true,
-                LogLevel = LogSeverity.Info
-            };
+            DiscordSocketClient discordClient = new DiscordSocketClient(new DiscordSocketConfig() { GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers, LogGatewayIntentWarnings = false, LogLevel = LogSeverity.Info });
+            CommandServiceConfig serviceConfig = new CommandServiceConfig() { DefaultRunMode = RunMode.Async, CaseSensitiveCommands = false, IgnoreExtraArgs = true, LogLevel = LogSeverity.Info };
+
             try {
                 // Load up from JSON file all bot required data
                 BotData botData = JsonConvert.DeserializeObject<BotData>(File.ReadAllText(@"BotData.json"));
@@ -40,9 +36,8 @@ namespace DenverSpeaker
                         client.SelfDeaf = true;
                     }).AddSingleton(botData)
                     .AddSingleton<CommHandler>();
-            } catch (FileNotFoundException excep) {
-                Console.WriteLine(excep.Message);
-            }
+            } catch (FileNotFoundException excep) { Console.WriteLine(excep.Message); }
+
             ServiceProvider serviceProvider = discordService.BuildServiceProvider();
             serviceProvider.GetRequiredService<CommHandler>();
             // Start discord bot connection asynchronous

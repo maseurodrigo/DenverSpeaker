@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# openjdk:13
-FROM azul/zulu-openjdk:13
+# openjdk:19-latest
+FROM azul/zulu-openjdk:19-latest
 WORKDIR /opt/Lavalink
 
 # Run as non-root user

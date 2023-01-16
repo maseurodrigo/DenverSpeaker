@@ -12,7 +12,6 @@
 | **stop** |  | Stop discord player and finish the current queue |
 | **leave** |  | Disconnect the bot from the current voice channel |
 | **queue** |  | List all the tracks that are currently on queue |
-| **ytparty** |  | Watch **YouTube** videos with other users on a voice channel |
 
 ```json
 {
